@@ -95,3 +95,20 @@ The **mean** value is the same because I added the mean value for that particula
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+* Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
+```{r echo=TRUE}
+activityFilled$day <- ifelse(as.POSIXlt(as.Date(activityFilled$date))$wday%%6 == 0,
+                          "weekend", "weekday")
+activityFilled$day <- factor(activityFilled$day, levels=c("weekday","weekend"))
+```
+
+
+* Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). The plot should look something like the following, which was creating using simulated data:
+```{r echo=TRUE}
+stepsInterval2 <- aggregate(steps~interval+day, activityFilled, mean)
+# Load lattice library
+library(lattice)
+xyplot(steps~interval|factor(day), data=stepsInterval2, aspect=1/2, type="l")
+
+```
