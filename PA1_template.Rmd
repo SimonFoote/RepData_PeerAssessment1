@@ -36,10 +36,62 @@ median(totalSteps$steps)
 
 ## What is the average daily activity pattern?
 
+* Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
+```{r echo=TRUE}
+stepsInterval <- aggregate(steps~interval, data=activity, mean, na.rm=TRUE)
+plot(steps~interval, data=stepsInterval, type="l")
+```
+
+* Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps? 
+```{r}
+stepsInterval[which.max(stepsInterval$steps),]$interval
+```
+
+It is the **`r stepsInterval[which.max(stepsInterval$steps),]$interval`th** interval that contains the maximum number of steps.
 
 ## Imputing missing values
 
+* Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+```{r echo=TRUE}
+sum(is.na(activity$steps))
+```
+A total of `r sum(is.na(activity$steps))` rows are missing.
+
+* Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+I will use a strategy of filing in all of the missing values with the mean for that 5-minute interval, by using a function that will get the mean steps for a particular 5-minute interval. 
+```{r echo=TRUE}
+interval2steps <- function(interval){
+    stepsInterval[stepsInterval$interval == interval,]$steps
+}
+```
+
+* Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+```{r echo=TRUE}
+activityFilled <- activity   # Make a new dataset from the original data
+
+for(i in 1:nrow(activityFilled)){
+    if(is.na(activityFilled[i,]$steps)){
+        activityFilled[i,]$steps <- interval2steps(activityFilled[i,]$interval)
+    }
+}
+```
+
+* Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. 
+```{r echo=TRUE}
+totalSteps2 <- aggregate(steps~date, data=activityFilled, sum)
+hist(totalSteps2$steps)
+mean(totalSteps2$steps)
+median(totalSteps2$steps)
+```
+* The **mean** total number of steps taken per day is `r mean(totalSteps2$steps)` steps.
+* The **median** total number of steps taken per day is `r median(totalSteps2$steps)` steps.
+
+* Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+The **mean** value is the same because I added the mean value for that particular 5-min interval to the data, making no change. The **median** value is different due to the additional values added in th filled data set.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
